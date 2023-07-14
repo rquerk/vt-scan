@@ -1,0 +1,16 @@
+[Unit]
+Description=Auto Scan a Fileshare
+After=network.target
+StartLimitIntervalSec=30
+StartLimitBurst= 1
+
+[Service]
+Type=exec
+Restart=on-failure
+Environment=VT_API_KEY=
+User=user
+Group=group
+ExecStart=/bin/python3 /virus-total/vt_scan_file.py
+
+[Install]
+WantedBy=multi-user.target
