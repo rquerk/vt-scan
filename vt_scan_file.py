@@ -6,8 +6,6 @@ import subprocess
 import shutil
 from datetime import datetime
 
-from pdb import set_trace as bp
-
 SCAN_PATH = "/usr/local/src/virus-total/scan/"
 REPORT_PATH = "/usr/local/src/virus-total/report/"
 full_file_paths = []
@@ -23,16 +21,17 @@ def scan_URLs():
         try:
                 url_list.remove(URLs_file_header)
         except ValueError:
-                logging.warning(str(datetime.now()) + "URLs file misses header")
-        for url in url_list:
-                scan_url(url.strip("\n"))
+                logging.warning(str(datetime.now()) + " URLs file misses header")
+        if url_list:
+                for url in url_list:
+                        scan_url(url.strip("\n"))
 
 def scan_url(url:str):
         logging.info(f"{str(datetime.now())} Scanning URL: {url}")
         analysis = client.scan_url(url)
         wait_for_result(analysis, url)
 
-def wait_for_result(analysis, scanned):
+def wait_for_result(analysis, scanned_file):
         # asking for the analysis object until it's status is completed
         Finished = False
         while not Finished:
@@ -41,7 +40,7 @@ def wait_for_result(analysis, scanned):
                 if result.status == "completed":
                         Finished = True
                         with open(REPORT_PATH + "scan_statistics.txt", "a") as stats_file:
-                                stats_file.write(f"{str(datetime.now())} Scan results from {scanned}:\n")
+                                stats_file.write(f"{str(datetime.now())} Scan results from {scanned_file}:\n")
                                 stats_file.write(str(result.stats).strip("{}").replace("'","")+"\n")
                         break
                 time.sleep(30)
