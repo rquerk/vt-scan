@@ -12,6 +12,7 @@ SCAN_PATH = "/usr/local/src/virus-total/scan/"
 URLs_FILENAME = "URLs.txt"
 URLs_FILE_HEADER = "Paste URLs below this line\n"
 
+
 class URLFile:
 
     def create:
@@ -75,7 +76,10 @@ class Scanner:
     vt_client = None
     scan_result = None
 
-    def scan_file():
+    def __init__(client):
+        self.vt_client = client
+
+    def scan_file(path):
         try:
             vt_scan_file(path)
         except Exception as Ex_scan:
@@ -115,16 +119,23 @@ class Scanner:
                 vt_scan_url(url.strip("\n"))
             URLFile.create()
 
-    def vt_scan_url(url:str):
+    def vt_scan_url(url: str):
         logging.info(f"{str(datetime.now())} Scanning URL: {url}")
-        analysis = self.client.scan_url(url)
+        analysis = self.vt_client.scan_url(url)
         wait_for_result(analysis, url)
 
 class MailReport:
 
     def write_report(scan_results):
-        for entry in objects:
-
+    #TODO
+    # save every owner once
+    owners = []
+    reports = []
+    for result in scan_results:
+        if result.owner not in owners:
+            owners.append(result.owner)
+    # save every result to its owners object
+    for
 
 def _delete_files_and_dirs_in_list(paths):
     for path in paths:
@@ -140,9 +151,20 @@ def write_result(result, filename):
         stats_file.write(str(result.stats).strip("{}").replace("'","")+"\n")
 
 
-
-
-
+if __name__ == "__main__":
+    URLFile.create()
+    all_files = GetFilenames()
+    all_files.check_if_path_exists(SCAN_PATH)
+    files_to_scan = all_files.get_filenames_in_directory(SCAN_PATH)
+    if files_to_scan:
+        all_files.get_full_path_of_every_file(files_to_scan, SCAN_PATH)
+        with vt.Client(os.environ["VT_API_KEY"]) as client:
+            scan_results = []
+            for path in all_files.files:
+                scanner = Scanner(client)
+                scanner.scan_file(path)
+                scan_results.append(scanner.scan_result)
+        MailReport.write_report(scan_results)
 
 
 
